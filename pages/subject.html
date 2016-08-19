@@ -1,0 +1,431 @@
+<html ng-app>
+
+<head>
+    <title>Athena</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="http://dimsemenov.com/plugins/royal-slider/royalslider/skins/default/rs-default.css?v=1.0.4">
+    <link rel="stylesheet" href="http://dimsemenov.com/plugins/royal-slider/royalslider/royalslider.css">
+    <link rel="stylesheet" href="http://dimsemenov.com/plugins/royal-slider/preview-assets/css/reset.css?v=1.0.4">
+    <link rel="stylesheet" href="pstyle1.css">
+    <link rel="stylesheet" type="text/css" href="player.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="http://dimsemenov.com/plugins/royal-slider/royalslider/jquery.royalslider.min.js?v=9.3.6"></script>
+    <meta name="google-signin-scope" content="profile email">
+    <meta name="google-signin-client_id" content="299211330534-8m6edc4on9j26u4m0o2v8nfb9jktqmra.apps.googleusercontent.com">
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <script src="../script.js"></script>
+    <script src="player.js"></script>
+    <script src="https://use.fontawesome.com/56178d6125.js"></script>
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <script type="text/javascript">
+        $("document").ready(function() {
+            //var className = window.location.search.substring(1).split("=")[1];
+            /*
+            var className = "heeelllo";
+            if (className.includes("&")) {
+                className = className.split("&")[0];
+            }*/
+            //console.log(className);
+            //$("#selectedClass").text(className);
+        })
+
+        function SubjectController($scope) {
+            $scope.name = "Name"
+            $scope.subjects = [];
+            $scope.addSubject = function() {
+                /*
+                                $scope.subjects.push($scope.newSubject);
+                                var subjectName = $scope.newSubject;
+                                var query = window.location.search.substring(1);
+                                console.log(query);
+                                $("#listo").append("<li id=\"" + subjectName + "\" class=\"classli\" ng-repeat=\"subject in subjects\"><a href=\"subject.html?class=" + query.split("=")[1] + "&unit=" + subjectName + "\"><p id=\"subject\">" + subjectName +
+                                    "</p></a></li>")
+                                $("#classInput").val('');*/
+                console.log("not needed");
+            }
+            $scope.remove = function() {
+                var head = $scope.subjects.length;
+                var headItem = $scope.subjects[head - 1];
+                console.log(headItem);
+                $("#listo").find("#" + headItem).remove();
+                console.log($scope.subjects);
+                $scope.subjects.splice(head - 1, 1);
+            }
+        }
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/3.2.1/firebase.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/aes.js"></script>
+    <script>
+        var currentSubject;
+
+        function onSignIn(googleUser) {
+            // Useful data for your client-side scripts:
+            profile = googleUser.getBasicProfile();
+            console.log("ID: " + profile.getId()); // Don't send this directly to your server!
+            console.log('Full Name: ' + profile.getName());
+            console.log('Given Name: ' + profile.getGivenName());
+            console.log('Family Name: ' + profile.getFamilyName());
+            console.log("Image URL: " + profile.getImageUrl());
+            console.log("Email: " + profile.getEmail());
+
+            // The ID token you need to pass to your backend:
+            var id_token = googleUser.getAuthResponse().id_token;
+            console.log("ID Token: " + id_token);
+            initProfile();
+            getSubSess(function(snapshot) {
+
+                document.getElementById("selectedClass").innerHTML = "<li id='" + snapshot.val() + "' class='classli' ng-repeat='subject in subjects'>" + snapshot.val() + "</li>";
+                currentSubject = snapshot.val();
+                console.log("doonononone");
+                console.log("current subject: " + currentSubject);
+                displayUnits(str);
+            });
+            console.log("successful login");
+        }
+        var email, encrypt, decrypted, str;
+        var initCheckSched = true;
+        var config = {
+            apiKey: "AIzaSyCZ889AMfMfGmNFiVG1m2I2vBJeW_Ybruw",
+            authDomain: "projectathena-ea017.firebaseapp.com",
+            databaseURL: "https://projectathena-ea017.firebaseio.com",
+            storageBucket: "projectathena-ea017.appspot.com",
+        };
+        // ;; init firebase;;
+        firebase.initializeApp(config);
+        var ref = firebase.database().ref();
+
+
+        function initProfile() {
+            email = profile.getEmail();
+            encrypted = btoa(CryptoJS.AES.encrypt(email, "projectAthena"));
+            decrypted = CryptoJS.AES.decrypt(atob(encrypted), "projectAthena");
+            str = decrypted.toString(CryptoJS.enc.Hex);
+        }
+
+        function getSubSess(funct) {
+            ref.child('userbase/' + str + '/subsession').once('value').then(function(snapshot) {
+                console.log(snapshot.key);
+                console.log(snapshot.val());
+                funct(snapshot);
+                //document.getElementById("selectedClass").innerHTML = "<li id='" + snapshot.val() + "' class='classli' ng-repeat='subject in subjects'>" + snapshot.val() + "</li>";
+            })
+        }
+
+        function hasUnits(acc, trueFunct, falseFunct) {
+            ref.child('units').once("value")
+                .then(function(snapshot) {
+                    var key = snapshot.key; // "ada"
+
+                    if (snapshot.hasChild(acc) == false) {
+                        console.log("schedule doesnt exist, create new one");
+                        falseFunct();
+                    } else {
+                        console.log("schedule exists, dont create anything");
+                        trueFunct();
+                    }
+                    //snapshot.hasChild(acc)
+                });
+        }
+
+        function initUnits(acc) {
+            var unit = "random";
+            var foo = {};
+            var bar = {};
+            var far = {};
+            far['tesst'] = "tesst";
+            bar[acc] = far;
+            foo['units'] = bar;
+            ref.child('units').update(far);
+            console.log("added done");
+
+        }
+
+        function createUnitBase(acc, subj, unit) {
+            var foo = {};
+            var bar = {};
+            bar[subj] = [unit];
+            foo[acc] = bar;
+            ref.child('units').update(foo);
+            console.log("new userbase for units was created!");
+        }
+
+        function getUnits(acc) {
+            ref.child('units').once("value")
+                .then(function(snapshot) {
+                    snapshot.forEach(function(childSnapshot) {
+                        // key will be "ada" the first time and "alan" the second time
+                        var key = childSnapshot.key;
+                        console.log(key + " and acc: " + acc);
+                        if (key == acc) {
+                            console.log(acc + " is = to " + key);
+                            document.getElementById("listo").innerHTML = "";
+                            childSnapshot.forEach(function(innerChild) {
+                                $("#listo").append("<li id='" + innerChild.val() + "' class='classli' ng-repeat='subject in subjects'><a href= 'subject.html'><p class = 'classArr' id='subject'>" +
+                                    innerChild.val() +
+                                    "</p></a>" + "<button class='delButton' onclick=''>-</button>" + "</li>");
+                                // <button class="delButton" ng-click="remove()">-</button>
+                                // <a href='subject.html'" + innerChild.val() +"\"
+                                console.log(innerChild.getKey());
+                                console.log(innerChild.val());
+                            });
+                            return true;
+                        } else {
+                            console.log("not equal");
+                        }
+                        // childData will be the actual contents of the child
+                        var childData = childSnapshot.val();
+                        console.log("key: " + key);
+                        console.log("value: " + childData);
+                        console.log(childSnapshot);
+                    });
+                });
+        }
+
+        function checkUserUnit(acc) {
+            hasUnits(acc, function() {
+                console.log("user already init schedule");
+                getUnits(acc);
+
+            }, function() {
+                console.log("schedule not init, do so.");
+                document.getElementById('listo').innerHTML = "Add a unit to begin studying!";
+            });
+        }
+
+        function editUnitBase(acc, trueFunct, falseFunct) {
+            var sub = getSubSess(function() {})
+            ref.child('units').once("value")
+                .then(function(snapshot) {
+                    var key = snapshot.key; // "ada"
+                    if (snapshot.hasChild(acc) == false) {
+                        falseFunct();
+                    } else {
+                        trueFunct();
+                    }
+
+                    console.log("after callback" + key);
+                    //snapshot.hasChild(acc)
+                });
+        }
+
+        function editUnits(acc) {
+            console.log("ediiiit lcasss");
+            var sub = document.getElementById('classInput').value;
+            console.log(sub);
+            if (sub.length > 0) {
+                editUnitBase(acc, function() {
+                    console.log("callback for true");
+                    console.log(sub);
+                    addUnit(acc, sub);
+                    getUnits(acc);
+
+                }, function() {
+                    console.log("callback for false");
+                    createUnitBase(acc, sub);
+                    getUnits(acc);
+                });
+
+            } else {
+                console.log("please type in a class");
+            }
+
+
+
+            document.getElementById('classInput').value = "";
+        }
+
+        function setUnit(acc, unit) {
+            /*
+            console.log("adddlcllalslsla");
+            var foo = {};
+            foo[subj] = subj;
+            ref.child('units').child(acc).update(foo);
+            console.log(acc);*/
+            // add first unit when array exists.
+            var foo = {};
+            foo[unit] = unit;
+            ref.child('schedule').child(acc).child(currentSubject).set(foo);
+            console.log("this should be done when first class is added!");
+
+
+        }
+
+        function addUnit(acc, unit) {
+            var foo = {};
+            foo[unit] = unit;
+            ref.child('schedule').child(acc).child(currentSubject).update(foo);
+            console.log("added unit, but should be done when other units are already added!");
+        }
+
+        function unitChange(acc) {
+            var unitInput = document.getElementById('classInput').value;
+            if (unitInput.length > 0) {
+                checkForEmpty(acc, function() {
+                    setUnit(acc, unitInput);
+                    console.log("first unit added");
+                    console.log(unitInput);
+                    document.getElementById('classInput').value = "";
+                    displayUnits(str);
+                    console.log("units should be displayed!");
+                }, function() {
+                    addUnit(acc, unitInput);
+                    console.log("units already exists, so just added instead of set");
+                    console.log(unitInput);
+                    document.getElementById('classInput').value = "";
+                    displayUnits(str);
+                    console.log("displayed should be done");
+
+                })
+            } else {
+                console.log("please add a valid unit!");
+            }
+        }
+
+        function checkForEmpty(acc, trueFunct, falseFunct) {
+
+            ref.child('schedule').child(acc).child(currentSubject).once('value')
+                .then(function(snapshot) {
+                    if (snapshot.hasChild('0')) {
+                        console.log("this means there are no units in the database for user subject");
+                        trueFunct();
+                    } else {
+                        console.log("this means there units in the database, not the first added unit");
+                        falseFunct();
+                    }
+                })
+        }
+
+        function checkUser_subject(acc) {
+            /*
+              ref.child('schedule').child(acc).once('value').then(function(snapshot) {
+                  snapshot.forEach(function(childData) {
+                      console.log(childData.val());
+                      console.log(childData.key);
+                  })
+              })*/
+
+            console.log(ref.child('schedule').child(acc).child(currentSubject));
+        }
+
+        function getUnitForDel(ele) {
+            return (ele.parentNode.children[1].innerHTML);
+        }
+
+        function addFirstIdx(acc) {
+            var foo = ['none'];
+            ref.child('schedule').child(acc).child(currentSubject).set(foo);
+            console.log("added unit, but should be done when other units are already added!");
+        }
+
+        function deleteUnit(acc, ele) {
+            ref.child('schedule').child(acc).child(currentSubject).once('value')
+                .then(function(snapshot) {
+                    //removeUnit(acc, ele);
+                    //console.log(snapshot.numChildren());
+                    if (snapshot.numChildren() > 1) {
+                        removeUnit(acc, ele);
+                        console.log("item was deleted and items left is greater than 1");
+                    } else {
+                        console.log("this is the last item left. take action");
+                        addFirstIdx(acc);
+                        displayUnits(acc);
+                        console.log("deleted and also added array needed");
+                    }
+                })
+        }
+
+        function removeUnit(acc, ele) {
+            remUnit = getUnitForDel(ele);
+            ref.child('schedule').child(acc).child(currentSubject).child(remUnit).remove().then(function() {
+                console.log(remUnit + " has been deleted :(");
+                displayUnits(acc);
+            });
+
+        }
+
+        function displayUnits(acc) {
+            checkForEmpty(acc, function() {
+                console.log("nothing to display!");
+                document.getElementById('listo').innerHTML = "You have no units for " + currentSubject + ". Please add a unit to begin your academic conquest!";
+            }, function() {
+                document.getElementById('listo').innerHTML = "";
+                ref.child('schedule').child(acc).child(currentSubject).once('value')
+                    .then(function(snapshot) {
+                        snapshot.forEach(function(childData) {
+                            console.log(childData.val());
+                            console.log(childData.key);
+                            $("#listo").append("<li id='" + childData.getKey() +
+                                "' class='classli' ng-repeat='subject in subjects'><p><a  style = 'cursor:pointer' onclick = 'getInputSearch(this);' class = 'classArr' id='subject' href = 'results.html'>" +
+                                childData.getKey() +
+                                "</a></p>" + "<button class='delButton' onclick='deleteUnit(str,this);'>-</button>" + "</li>");
+                        })
+                    })
+            })
+        }
+
+        function getTypedUnit(ele) {
+            return (ele.parentNode.children[0].innerHTML);
+        }
+
+        function getCurrentSuject() {
+            return currentSubject;
+        }
+
+        function getInputSearch(ele) {
+            var allTyped = getCurrentSuject() + " " + getTypedUnit(ele);
+            console.log(allTyped);
+            addUnitSess(str, allTyped);
+        }
+
+        function showVid() {
+            document.getElementById('videoContainerDisp').style.visibility = "visible";
+
+            $("#video-gallery").css("opacity", "1");
+        }
+
+        function addUnitSess(acc, sess) {
+            var foo = {};
+
+            foo['unitsession'] = sess;
+            ref.child('userbase').child(acc).update(foo);
+            console.log("session has been added!");
+        }
+    </script>
+</head>
+
+<body>
+    <div class="navBarI">
+        <a href="homepage.html">
+            <div id="backButton" style="height:60px;font-size:24;z-index:1;padding-top:10px; padding-left:15px;color:white">
+                <i class="fa fa-arrow-left"> </i> Back</div>
+        </a>
+    </div>
+    <ul class="nav">
+    </ul>
+    <div id="AthenaLogo">
+        <a href="http://www.athenaasc.com">
+            <img src="../assets/Greek.png" width="10%" style="margin-top:-50px;">
+        </a>
+    </div>
+    <div id="wrapperC">
+    <h3 id="classTitle" style="margin-bottom:10px"> Selected Class:  </h3>
+    <div class="classStyle">
+        <p id="selectedClass">
+        </p>
+    </div>
+    <h3 id="classTitle"> Current Topics</h3>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.1/angular.min.js">
+    </script>
+    <div ng-controller="SubjectController">
+        <ul class="class" id="listo">
+        </ul>
+        <input id="classInput" class="classInput" placeholder="Enter a topic" type="text" ng-model="newSubject">
+        <button class="addButton" onclick="unitChange(str);">+</button>
+    </div></div>
+    <div class="g-signin2" data-onsuccess="onSignIn" data-theme="light" style="display:none;"></div>
+</body>
+
+</html>

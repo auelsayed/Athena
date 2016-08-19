@@ -1,0 +1,112 @@
+body {
+    font-family: 'Roboto', sans-serif;
+    line-height: 1.6em;
+    color: #666;
+    font-size: 14px;
+}
+
+.content
+{
+  height:80%;
+   overflow:auto;
+    background:#fff;
+}
+
+a {
+    color: #666;
+    text-decoration: none;
+}
+
+#container {
+    width: 75%;
+    background: #fff;
+    margin: auto;
+    margin-top: 20px;
+}
+
+.clearfix {
+    clear:both;
+}
+
+header {
+    padding: 30px 20px;
+    background: #f4f4f4;
+}
+
+header h1 {
+    color: black;
+    margin-bottom: 5px;
+}
+
+header span {
+    color: #dd2826;
+}
+
+section {
+    padding: 30px 20px 20px 20px;
+}
+
+footer {
+    padding: 20px;
+    background: #6d9d30;
+    text-align: center;
+    color: white;
+    font-size:16px;
+}
+
+#search-form {
+    display: block;
+    margin-bottom: 15px;
+}
+
+.fieldcontainer {
+    display: block;
+    position: relative;
+    width: 90%;
+    margin: 0 auto;
+}
+
+#results li {
+    padding: 10px 0;
+    border-bottom: 1px dotted #ccc;
+    list-style: none;
+    overflow: auto;
+}
+.list-left {
+    float: left;
+    width: 20%;
+}
+.list-left img {
+    width: 100%;
+    padding: 3px;
+    border: 1px solid #ccc;
+}
+.list-right {
+    float: right;
+    width: 78%;
+}
+.list-right h3 {
+    margin: 0;
+}
+.list-right p {
+    margin: 0;
+}
+
+.cTitle {
+    color: #dd2826;
+}
+
+.button-container {
+    margin-top: 25px;
+    
+}
+
+.paging-button {
+    background: #6d9d30;
+    padding: 5px 15px;
+    border-radius: 30px;
+    border: none;
+    color: white;
+    cursor: pointer;
+    margin-left: 25%;
+}

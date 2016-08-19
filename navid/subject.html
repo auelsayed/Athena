@@ -1,0 +1,194 @@
+<html ng-app>
+
+<head>
+    <title>Athena</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href='http://fonts.googleapis.com/css?family=Jaldi:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="http://dimsemenov.com/plugins/royal-slider/royalslider/skins/default/rs-default.css?v=1.0.4">
+    <link rel="stylesheet" href="http://dimsemenov.com/plugins/royal-slider/royalslider/royalslider.css">
+    <link rel="stylesheet" href="http://dimsemenov.com/plugins/royal-slider/preview-assets/css/reset.css?v=1.0.4">
+    <link rel="stylesheet" href="pstyle1.css">
+    <link rel="stylesheet" type="text/css" href="player.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="http://dimsemenov.com/plugins/royal-slider/royalslider/jquery.royalslider.min.js?v=9.3.6"></script>
+    <meta name="google-signin-scope" content="profile email">
+    <meta name="google-signin-client_id" content="299211330534-8m6edc4on9j26u4m0o2v8nfb9jktqmra.apps.googleusercontent.com">
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <script src="../script.js"></script>
+    <script src="player.js"></script>
+    <script src="https://use.fontawesome.com/56178d6125.js"></script>
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <script type="text/javascript">
+        $("document").ready(function() {
+            //var className = window.location.search.substring(1).split("=")[1];
+            /*
+            var className = "heeelllo";
+            if (className.includes("&")) {
+                className = className.split("&")[0];
+            }*/
+            //console.log(className);
+            //$("#selectedClass").text(className);
+        })
+
+        function SubjectController($scope) {
+            $scope.name = "Name"
+            $scope.subjects = [];
+            $scope.addSubject = function() {
+                /*
+                                $scope.subjects.push($scope.newSubject);
+                                var subjectName = $scope.newSubject;
+                                var query = window.location.search.substring(1);
+                                console.log(query);
+                                $("#listo").append("<li id=\"" + subjectName + "\" class=\"classli\" ng-repeat=\"subject in subjects\"><a href=\"subject.html?class=" + query.split("=")[1] + "&unit=" + subjectName + "\"><p id=\"subject\">" + subjectName +
+                                    "</p></a></li>")
+                                $("#classInput").val('');*/
+                console.log("not needed");
+            }
+            $scope.remove = function() {
+                var head = $scope.subjects.length;
+                var headItem = $scope.subjects[head - 1];
+                console.log(headItem);
+                $("#listo").find("#" + headItem).remove();
+                console.log($scope.subjects);
+                $scope.subjects.splice(head - 1, 1);
+            }
+        }
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/3.2.1/firebase.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/aes.js"></script>
+    <script>
+        function onSignIn(googleUser) {
+            // Useful data for your client-side scripts:
+            profile = googleUser.getBasicProfile();
+            console.log("ID: " + profile.getId()); // Don't send this directly to your server!
+            console.log('Full Name: ' + profile.getName());
+            console.log('Given Name: ' + profile.getGivenName());
+            console.log('Family Name: ' + profile.getFamilyName());
+            console.log("Image URL: " + profile.getImageUrl());
+            console.log("Email: " + profile.getEmail());
+
+            // The ID token you need to pass to your backend:
+            var id_token = googleUser.getAuthResponse().id_token;
+            console.log("ID Token: " + id_token);
+            initProfile();
+            getSubSess();
+            //checkUserSchedule(str);
+        }
+        var email, encrypt, decrypted, str;
+        var initCheckSched = true;
+        var config = {
+            apiKey: "AIzaSyCZ889AMfMfGmNFiVG1m2I2vBJeW_Ybruw",
+            authDomain: "projectathena-ea017.firebaseapp.com",
+            databaseURL: "https://projectathena-ea017.firebaseio.com",
+            storageBucket: "projectathena-ea017.appspot.com",
+        };
+        // ;; init firebase;;
+        firebase.initializeApp(config);
+        var ref = firebase.database().ref();
+
+
+        function initProfile() {
+            email = profile.getEmail();
+            encrypted = btoa(CryptoJS.AES.encrypt(email, "projectAthena"));
+            decrypted = CryptoJS.AES.decrypt(atob(encrypted), "projectAthena");
+            str = decrypted.toString(CryptoJS.enc.Hex);
+        }
+
+        function getSubSess() {
+            ref.child('userbase/' + str + '/subsession').once('value').then(function(snapshot) {
+                console.log(snapshot.key);
+                console.log(snapshot.val());
+                document.getElementById("selectedClass").innerHTML = "<li id='" + snapshot.val() + "' class='classli' ng-repeat='subject in subjects'>" + snapshot.val() + "</li>";
+            })
+        }
+
+        function initUnits(acc) {
+            var unit = "random";
+            var foo = {};
+            var bar = {};
+            var far = {};
+            far[unit] = unit;
+            bar[acc] = far;
+            foo['units'] = bar;
+            ref.update(foo);
+            console.log("added done");
+
+        }
+    </script>
+</head>
+
+<body>
+    <div class="navBarI">
+        <a href="homepage.html">
+            <div id="backButton" style="height:60px;font-size:24;z-index:1;padding-top:10px; padding-left:15px;color:white">
+                <i class="fa fa-arrow-left"> </i> Back</div>
+        </a>
+    </div>
+    <ul class="nav">
+    </ul>
+    <div id="AthenaLogo">
+        <a href="http://www.athenaasc.com">
+            <img src="../assets/Greek.png" width="10%" style="margin-top:-50px;">
+        </a>
+    </div>
+    <h3 id="classTitle" style="margin-bottom:10px"> Selected Class:  </h3>
+    <div class="classStyle">
+        <p id="selectedClass">
+        </p>
+    </div>
+    <h3 id="classTitle"> Current </h3>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.1/angular.min.js">
+    </script>
+    <div ng-controller="SubjectController">
+        <ul class="class" id="listo">
+        </ul>
+        <input id="classInput" class="classInput" placeholder="Enter a topic" type="text" ng-model="newSubject">
+        <button class="addButton" ng-click="addSubject()">+</button>
+        <button class="delButton" ng-click="remove()">-</button>
+    </div>
+    <div onclick="initUnits(str);"> Test </div>
+    <div class="g-signin2" data-onsuccess="onSignIn" data-theme="light" style="display:none;"></div>
+    <div class="row clearfix">
+      <div class="col span_6 fwImage">
+    <div id="video-gallery" class="royalSlider videoGallery rsDefault">
+       <a class="rsImg" data-rsVideo="https://vimeo.com/45830194" href="http://b.vimeocdn.com/ts/319/715/319715493_640.jpg">
+        <div class="rsTmb">
+          <h5>Stanley Piano</h5>
+          <span>by Digital Kitchen</span>
+        </div>
+      </a>
+
+       <a class="rsImg" data-rsVideo="https://www.youtube.com/watch?v=mOM8wkBT6X4" href="http://b.vimeocdn.com/ts/311/891/311891198_640.jpg">
+        <div class="rsTmb">
+          <h5>Dubstep Dispute</h5>
+          <span>by Fluxel Media</span>
+        </div>
+      </a>
+      <a class="rsImg" data-rsVideo="https://vimeo.com/45778774" href="http://b.vimeocdn.com/ts/318/502/318502540_640.jpg">
+        <div class="rsTmb">
+          <h5>The Epic / The Beasts</h5>
+          <span>by Sebastian Linda</span>
+        </div>
+      </a>
+       <a class="rsImg" data-rsVideo="https://vimeo.com/41132461" href="http://b.vimeocdn.com/ts/284/709/284709146_640.jpg">
+        <div class="rsTmb">
+          <h5>Barcode Band</h5>
+          <span>by Kang woon Jin</span>
+        </div>
+      </a>
+     <a class="rsImg" data-rsVideo="https://vimeo.com/44388232" href="http://b.vimeocdn.com/ts/308/375/308375094_640.jpg">
+        <div class="rsTmb">
+          <h5>Samm Hodges Reel</h5>
+          <span>by Animal</span>
+        </div>
+      </a>
+    </div>
+      </div>
+
+    </div>
+</body>
+
+</html>

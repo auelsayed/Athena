@@ -1,0 +1,318 @@
+<html ng-app>
+
+<head>
+    <title>Athena</title>
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="pstyle1.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <meta name="google-signin-scope" content="profile email">
+    <meta name="google-signin-client_id" content="299211330534-8m6edc4on9j26u4m0o2v8nfb9jktqmra.apps.googleusercontent.com">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="beauty.css">
+    <script src="https://apis.google.com/js/client.js?onload=googleApiClientReady"></script>
+
+
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <script src="../script.js"></script>
+    <script src="https://use.fontawesome.com/56178d6125.js"></script>
+    <script>
+        function onSignIn(googleUser) {
+            console.log("this is the updated fileeee----");
+            // Useful data for your client-side scripts:
+            profile = googleUser.getBasicProfile();
+            console.log("ID: " + profile.getId()); // Don't send this directly to your server!
+            console.log('Full Name: ' + profile.getName());
+            console.log('Given Name: ' + profile.getGivenName());
+            console.log('Family Name: ' + profile.getFamilyName());
+            console.log("Image URL: " + profile.getImageUrl());
+            console.log("Email: " + profile.getEmail());
+
+            // The ID token you need to pass to your backend:
+            var id_token = googleUser.getAuthResponse().id_token;
+            console.log("ID Token: " + id_token);
+            initProfile();
+            getUnitSess(str, function(snapshot) {
+                console.log("hello");
+                console.log(snapshot.val());
+                currentSearch = snapshot.val();
+                searchCall(currentSearch);
+                searchCall(snapshot.val());
+                search();
+
+            });
+            //checkUserSchedule(str);
+        }
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/3.2.1/firebase.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/aes.js"></script>
+    <script>
+        // Initialize Firebase
+        var email, encrypt, decrypted, str, currentSearch;
+        var initCheckSched = true;
+        var config = {
+            apiKey: "AIzaSyCZ889AMfMfGmNFiVG1m2I2vBJeW_Ybruw",
+            authDomain: "projectathena-ea017.firebaseapp.com",
+            databaseURL: "https://projectathena-ea017.firebaseio.com",
+            storageBucket: "projectathena-ea017.appspot.com",
+        };
+        firebase.initializeApp(config);
+        var ref = firebase.database().ref();
+
+        function initProfile() {
+            email = profile.getEmail();
+            encrypted = btoa(CryptoJS.AES.encrypt(email, "projectAthena"));
+            decrypted = CryptoJS.AES.decrypt(atob(encrypted), "projectAthena");
+            str = decrypted.toString(CryptoJS.enc.Hex);
+        }
+
+        function getUnitSess(acc, funct) {
+            ref.child('userbase').child(acc).child('unitsession').once('value').then(function(snapshot) {
+                funct(snapshot);
+            });
+        }
+        var gapikey = 'AIzaSyCKMpw2nmPnon_gkh4EIXnbiAmrZNw-v4M';
+
+        $(function() {
+
+            // call fancybox pluggin (note: linked in in codepen js settings)
+
+            var searchField = $('#query');
+            var icon = $('#search-btn');
+
+            //Focus event handler
+            $(searchField).on('focus', function() {
+                $(this).animate({
+                    width: '90%'
+                }, 400);
+                $(icon).animate({
+                    right: '21px'
+                }, 400);
+            });
+
+            // Blur event handler
+            $(searchField).on('blur', function() {
+                if (searchField.val() == '') {
+                    $(searchField).animate({
+                        width: '45%'
+                    }, 400, function() {});
+                    $(icon).animate({
+                        right: '304px'
+                    }, 400, function() {});
+                }
+            });
+
+            $('#search-form').submit(function(e) {
+                e.preventDefault();
+            });
+        });
+
+        function search() {
+            // clear
+            $('#results').html('');
+            $('#buttons').html('');
+
+            // get form input
+
+            //q = $('#query').val(); // this probably shouldn't be created as a global
+            //q = topic;
+            q = currentSearch;
+            // run get request on API
+            $.get(
+                "https://www.googleapis.com/youtube/v3/search", {
+                    part: 'snippet, id',
+                    q: q,
+                    type: 'video',
+                    key: gapikey
+                },
+                function(data) {
+                    var nextPageToken = data.nextPageToken;
+                    var prevPageToken = data.prevPageToken;
+
+                    // Log data
+                    console.log(data);
+
+                    $.each(data.items, function(i, item) {
+
+                        // Get Output
+                        var output = getOutput(item);
+
+                        // display results
+                        $('#results').append(output);
+                    });
+
+                    var buttons = getButtons(prevPageToken, nextPageToken);
+
+                    // Display buttons
+                    $('#buttons').append(buttons);
+                });
+        }
+
+        // Next page function
+        function nextPage() {
+            var token = $('#next-button').data('token');
+            var q = $('#next-button').data('query');
+
+
+            // clear
+            $('#results').html('');
+            $('#buttons').html('');
+
+            // get form input
+            q = currentSearch; // this probably shouldn't be created as a global
+
+            // run get request on API
+            $.get(
+                "https://www.googleapis.com/youtube/v3/search", {
+                    part: 'snippet, id',
+                    q: q,
+                    pageToken: token,
+                    type: 'video',
+                    key: gapikey
+                },
+                function(data) {
+
+                    var nextPageToken = data.nextPageToken;
+                    var prevPageToken = data.prevPageToken;
+
+                    // Log data
+                    console.log(data);
+
+                    $.each(data.items, function(i, item) {
+
+                        // Get Output
+                        var output = getOutput(item);
+
+                        // display results
+                        $('#results').append(output);
+                    });
+
+                    var buttons = getButtons(prevPageToken, nextPageToken);
+
+                    // Display buttons
+                    $('#buttons').append(buttons);
+                });
+        }
+
+        // Previous page function
+        function prevPage() {
+            var token = $('#prev-button').data('token');
+            var q = $('#prev-button').data('query');
+
+
+            // clear
+            $('#results').html('');
+            $('#buttons').html('');
+
+            // get form input
+            q = currentSearch; // this probably shouldn't be created as a global
+
+            // run get request on API
+            $.get(
+                "https://www.googleapis.com/youtube/v3/search", {
+                    part: 'snippet, id',
+                    q: q,
+                    pageToken: token,
+                    type: 'video',
+                    key: gapikey
+                },
+                function(data) {
+
+                    var nextPageToken = data.nextPageToken;
+                    var prevPageToken = data.prevPageToken;
+
+                    // Log data
+                    console.log(data);
+
+                    $.each(data.items, function(i, item) {
+
+                        // Get Output
+                        var output = getOutput(item);
+
+                        // display results
+                        $('#results').append(output);
+                    });
+
+                    var buttons = getButtons(prevPageToken, nextPageToken);
+
+                    // Display buttons
+                    $('#buttons').append(buttons);
+                });
+        }
+
+        // Build output
+        function getOutput(item) {
+            var videoID = item.id.videoId;
+            var title = item.snippet.title;
+            var description = item.snippet.description;
+            var thumb = item.snippet.thumbnails.high.url;
+            var channelTitle = item.snippet.channelTitle;
+            var videoDate = item.snippet.publishedAt;
+
+            // Build output string
+            var output = '<li>' +
+                '<div class="list-left">' +
+                '<img src="' + thumb + '">' +
+                '</div>' +
+                '<div class="list-right">' +
+                '<h3><a data-fancybox-type="iframe" class="fancyboxIframe" href="http://youtube.com/embed/' + videoID + '?rel=0">' + title + '</a></h3>' +
+                '<small>By <span class="cTitle">' + channelTitle + '</span> on ' + videoDate + '</small>' +
+                '<p>' + description + '</p>' +
+                '</div>' +
+                '</li>' +
+                '<div class="clearfix"></div>' +
+                '';
+            console.log(channelTitle + " " + title + " " + thumb);
+            return output;
+        }
+
+        function getButtons(prevPageToken, nextPageToken) {
+            if (!prevPageToken) {
+                var btnoutput = '<div class="button-container">' +
+                    '<button id="next-button" class="paging-button" data-token="' + nextPageToken + '" data-query="' + q + '"' +
+                    'onclick = "nextPage();">Next Page</button>' +
+                    '</div>';
+            } else {
+                var btnoutput = '<div class="button-container">' +
+                    '<button id="prev-button" class="paging-button" data-token="' + prevPageToken + '" data-query="' + q + '"' +
+                    'onclick = "prevPage();">Prev Page</button>' +
+                    '<button id="next-button" class="paging-button" data-token="' + nextPageToken + '" data-query="' + q + '"' +
+                    'onclick = "nextPage();">Next Page</button>' +
+                    '</div>';
+            }
+
+            return btnoutput;
+        }
+
+        function searchCall(topic) {
+            console.log(topic);
+        }
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/3.2.1/firebase.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/aes.js"></script>
+</head>
+
+<body>
+    <div class="navBarI">
+        <a href="homepage.html">
+            <div id="backButton" style="height:60px;font-size:24;z-index:1;padding-top:10px; padding-left:15px;color:white"><i class="fa fa-arrow-left"></i> Back</div>
+        </a>
+    </div>
+    <div id="AthenaLogo">
+        <a href="http://www.athenaasc.com">
+            <img src="../assets/Greek.png" width="10%" style="margin-top:-50px;">
+        </a>
+    </div>
+    <div class="g-signin2" data-onsuccess="onSignIn" data-theme="light" style="display:none;"></div>
+    <div id="container">
+        <div class="content">
+        <section>
+            <ul id="results"></ul>
+            <div id="buttons"></div>
+        </section>
+        </div>
+        <footer>Copyright, &copy; Athena 2016</footer>
+    </div>
+</body>
+
+</html>

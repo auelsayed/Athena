@@ -1,0 +1,70 @@
+body { 
+    padding-top: 70px; 
+    background-image: url(assets/Desk.png);    
+    background-repeat: no-repeat;
+    background-size: 100%;
+    font-family: 'Roboto', sans-serif;
+}
+
+html {
+    height: 100%;
+}
+
+.navbar-default{
+    background-color: #99ffcc !important;
+}
+
+.navbar .navbar-nav {
+  display: inline-block;
+  float: none;
+  vertical-align: top;
+}
+
+.navbar .navbar-collapse {
+  text-align: center;
+}
+
+#homeheader{
+    color: white;
+    text-align: center;
+}
+
+#bttmheader{
+    color: white;
+    text-align: center;
+    padding-bottom: 10px;
+}
+
+.abcRioButton{
+    margin: auto;
+}
+
+a {
+    color: white;
+}
+
+a:hover {
+    color: #99ffcc;
+    text-decoration: none;
+}
+
+.logOutBtn {
+    font-family: 'Roboto', sans-serif;
+    color: black;
+  font-size: 16px;
+  background: #ffffff;
+  padding: 10px 20px 10px 20px;
+  text-decoration: none;
+    margin: auto;
+    border: none;
+}
+
+.logOutBtn:hover {
+  background: #ffffff;
+  background-image: -webkit-linear-gradient(top, #3cb0fd, #3498db);
+  background-image: -moz-linear-gradient(top, #3cb0fd, #3498db);
+  background-image: -ms-linear-gradient(top, #3cb0fd, #3498db);
+  background-image: -o-linear-gradient(top, #3cb0fd, #3498db);
+  background-image: linear-gradient(to bottom, #3cb0fd, #3498db);
+  text-decoration: none;
+}

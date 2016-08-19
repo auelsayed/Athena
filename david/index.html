@@ -1,0 +1,92 @@
+<html>
+
+<head>
+    <title>Athena</title>
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="style1.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <meta name="google-signin-scope" content="profile email">
+    <meta name="google-signin-client_id" content="299211330534-8m6edc4on9j26u4m0o2v8nfb9jktqmra.apps.googleusercontent.com">
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+    <script src="script.js"></script>
+</head>
+
+<body onload="hideDiv('none');">
+    <div id="background-image"></div>
+    <center><img src="assets/Greek.png" width="15%"></center>
+    <h1 style="font-size: 80px"><div id="homeheader">Welcome to Athena</div></h1>
+    <h2 style="font-size: 40px; margin-top:0px"><div id="bttmheader">The ultimate student hub</div></h2>
+    <div class="g-signin2" data-onsuccess="onSignIn" data-theme="light"></div>
+    <div id="logOut" onclick="signOut();">Sign out</div>
+    <div onclick="updateUserBase();"> Test </div>
+    <script>
+        var loggedIn = false;
+
+        function capFirstLetter(txt) {
+            return txt.charAt(0).toUpperCase() + txt.slice(1);
+        }
+
+        function hideDiv(sty) {
+            document.getElementById("logOut").style.display = sty;
+            if (sty == 'none') {
+                loggedIn = true;
+            }
+        }
+
+        function onSignIn(googleUser) {
+            // Useful data for your client-side scripts:
+            profile = googleUser.getBasicProfile();
+            console.log("ID: " + profile.getId()); // Don't send this directly to your server!
+            console.log('Full Name: ' + profile.getName());
+            console.log('Given Name: ' + profile.getGivenName());
+            console.log('Family Name: ' + profile.getFamilyName());
+            console.log("Image URL: " + profile.getImageUrl());
+            console.log("Email: " + profile.getEmail());
+
+            // The ID token you need to pass to your backend:
+            var id_token = googleUser.getAuthResponse().id_token;
+            console.log("ID Token: " + id_token);
+            document.getElementById("homeheader").innerHTML = "Welcome, " + capFirstLetter(profile.getGivenName());
+            document.getElementById("bttmheader").innerHTML = "<a href='pages/homepage.html?givenName=" + capFirstLetter(profile.getGivenName()) + "'> Click here to continue</a>";
+            document.getElementsByClassName("g-signin2")[0].style.display = "none";
+            console.log(profile.getGivenName);
+            console.log(gapi);
+            hideDiv('block');
+            loggedIn = true;
+        }
+        if (!loggedIn) {
+            hideDiv('block');
+        }
+    </script>
+
+    <script src="https://www.gstatic.com/firebasejs/3.2.1/firebase.js"></script>
+    <script>
+        // Initialize Firebase
+        var config = {
+            apiKey: "AIzaSyCZ889AMfMfGmNFiVG1m2I2vBJeW_Ybruw",
+            authDomain: "projectathena-ea017.firebaseapp.com",
+            databaseURL: "https://projectathena-ea017.firebaseio.com",
+            storageBucket: "projectathena-ea017.appspot.com",
+        };
+        firebase.initializeApp(config);
+        var database = firebase.database().ref();
+
+        function updateUserBase() {
+            var name = profile.getGivenName();
+            console.log(name);
+        }
+    </script>
+    <script>
+        function signOut() {
+            var auth2 = gapi.auth2.getAuthInstance();
+            auth2.signOut().then(function() {
+                console.log('User signed out.');
+                location.reload();
+            });
+        }
+    </script>
+</body>
+
+</html>
